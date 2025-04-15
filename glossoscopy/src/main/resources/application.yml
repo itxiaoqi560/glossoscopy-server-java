@@ -1,0 +1,82 @@
+server:
+  port: 8888 # 占用端口号
+spring:
+  application:
+    name: glossoscopy # 项目名称
+  profiles:
+    active: dev # 依赖配置文件
+  main:
+    allow-circular-references: true # 允许循环依赖
+  servlet:
+    multipart:
+      max-file-size: 10MB # 最大文件大小
+      max-request-size: 10MB # 最大请求大小
+  datasource:
+    druid:
+      max-evictable-idle-time-millis: 1800000 # 最大空闲时间
+      min-evictable-idle-time-millis: 600000 # 最小空闲时间
+      driver-class-name: ${glossoscopy.datasource.driver-class-name}
+      url: jdbc:mysql://${glossoscopy.datasource.host}:${glossoscopy.datasource.port}/${glossoscopy.datasource.database}?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
+      username: ${glossoscopy.datasource.username}
+      password: ${glossoscopy.datasource.password}
+  redis:
+    host: ${glossoscopy.redis.host}
+    port: ${glossoscopy.redis.port}
+    password: ${glossoscopy.redis.password}
+    database: ${glossoscopy.redis.database}
+  rabbitmq:
+    requested-heartbeat: 60 # 心跳测试间隔
+    connection-timeout: 30 # 连接超时时间
+    listener:
+      simple:
+        retry:
+          enabled: true # 允许消费重试
+          max-attempts: 5 # 最大消费重试次数
+          multiplier: 1 # 每次重试间隔乘以1
+          initial-interval: 5000 # 初始化消费重试间隔
+#  data:
+#    mongodb:
+#      uri: mongodb://root:1w34567890A@localhost:27017/glossoscopy?authSource=admin
+
+#rocketmq:
+#  name-server: localhost:9876 # NameServer地址
+#  producer:
+#    group: producer # 生产者组名
+
+mybatis-plus:
+  mapper-locations: classpath:mapper/*.xml # 标注xml文件位置
+  type-aliases-package: com.tcm.glossoscopy.entity.po # 类型别名包位置
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl # 日志输出控制台
+    map-underscore-to-camel-case: true # 开启驼峰映射
+    default-enum-type-handler: com.baomidou.mybatisplus.core.handlers.MybatisEnumTypeHandler # 使用枚举处理器
+
+logging:
+  level:
+    org.springframework.jdbc.support.JdbcTransactionManager: debug
+    com.tcm: debug
+  pattern:
+    dateformat: yyyy-MM-dd HH:mm:ss
+
+glossoscopy:
+  alioss:
+    endpoint: ${glossoscopy.alioss.endpoint}
+    access-key-id: ${glossoscopy.alioss.access-key-id}
+    access-key-secret: ${glossoscopy.alioss.access-key-secret}
+    bucket-name: ${glossoscopy.alioss.bucket-name}
+  alisms:
+    region-id: ${glossoscopy.alisms.region-id}
+    access-key-id: ${glossoscopy.alisms.access-key-id}
+    access-key-secret: ${glossoscopy.alisms.access-key-secret}
+    template-code: ${glossoscopy.alisms.template-code}
+    sign-name: ${glossoscopy.alisms.sign-name}
+  rabbit:
+    host: ${glossoscopy.rabbit.host}
+    username: ${glossoscopy.rabbit.username}
+    password: ${glossoscopy.rabbit.password}
+    port: ${glossoscopy.rabbit.port}
+  deepseek:
+    url: ${glossoscopy.deepseek.url}
+    key: ${glossoscopy.deepseek.key}
+  python:
+    url: ${glossoscopy.python.url}

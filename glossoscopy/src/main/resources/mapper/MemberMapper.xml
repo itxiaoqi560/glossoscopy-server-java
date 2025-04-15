@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tcm.glossoscopy.mapper.MemberMapper">
+    <update id="updateInfoById">
+        update tb_member
+        set update_time = #{updateTime}
+        <if test="memberName!=null and memberName!=''">
+            ,member_name = #{memberName}
+        </if>
+        <if test="avatar!=null and avatar!=''">
+            ,avatar = #{avatar}
+        </if>
+        <if test="anamnesis!=null and anamnesis!=''">
+            ,anamnesis = #{anamnesis}
+        </if>
+        <if test="occupation!=null and occupation!=''">
+            ,occupation = #{occupation}
+        </if>
+        <if test="sex!=null">
+            ,sex = #{sex}
+        </if>
+        <if test="birthday!=null">
+            ,birthday = #{birthday}
+        </if>
+        <if test="address!=null and address!=''">
+            ,address = #{address}
+        </if>
+        where id = #{id} and user_id=#{userId} and delete_flag=false
+    </update>
+
+    <update id="batchDeleteById">
+        update tb_member set delete_flag=true where user_id=#{userId} and id in
+        <foreach collection="idList" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+</mapper>

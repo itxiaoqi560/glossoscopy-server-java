@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tcm.glossoscopy.mapper.ChatTopicMapper">
+
+    <select id="getVOByUserId" resultType="com.tcm.glossoscopy.entity.vo.ChatTopicVO">
+        select ct.id,m.member_name ,u.username as doctor_name,ct.create_time
+        from tb_chat_topic ct join tb_member m on ct.member_id = m.id
+        join tb_user u on u.id = ct.doctor_id
+        where ct.user_id = #{userId} and ct.delete_flag=false
+    </select>
+</mapper>

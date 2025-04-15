@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tcm.glossoscopy.mapper.DoctorProfileMapper">
+
+    <update id="updateInfoByDoctorId">
+        update tb_doctor_profile
+        set update_time = #{updateTime}
+        <if test="title!=null and title !=''">
+            ,title=#{title}
+        </if>
+        <if test="introduction!=null and introduction !=''">
+            ,introduction=#{introduction}
+        </if>
+        <if test="specialty!=null and specialty !=''">
+            ,specialty=#{specialty}
+        </if>
+        <if test="hospital!=null and hospital !=''">
+            ,hospital=#{hospital}
+        </if>
+        <if test="education!=null and education !=''">
+            ,education=#{education}
+        </if>
+        <if test="workExperience!=null">
+            ,work_experience=#{workExperience}
+        </if>
+        where doctor_id = #{doctorId}
+    </update>
+</mapper>

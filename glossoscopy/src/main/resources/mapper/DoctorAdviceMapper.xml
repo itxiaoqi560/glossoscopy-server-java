@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tcm.glossoscopy.mapper.DoctorAdviceMapper">
+    <select id="pageQueryDoctorAdvice" resultType="com.tcm.glossoscopy.entity.po.DoctorAdviceDetail">
+        select da.id,timestampdiff(year, m.birthday, curdate()) as age,
+        r.tooth_mark,r.tongue_thickness,r.tongue_size,m.sex,da.advice,
+        r.coating_color,r.health_status,da.create_time,r.image
+        from tb_doctor_advice da
+        join tb_record r on da.record_id = r.id
+        join tb_member m on r.member_id = m.id
+        where r.delete_flag = false and m.delete_flag = false
+        and da.delete_flag =false and da.doctor_id = #{doctorId}
+        <if test="beginTime!=null">
+            and da.update_time &gt;= #{beginTime}
+        </if>
+        <if test="endTime!=null">
+            and da.create_time &lt;= #{endTime}
+        </if>
+        order by da.create_time desc
+    </select>
+
+    <update id="batchDeleteDoctorAdvice">
+        update tb_doctor_advice set delete_flag = true
+        where doctor_id = #{doctorId} and id in
+        <foreach collection="idList" item="id" open="(" separator="," close=")" >
+            #{id}
+        </foreach>
+    </update>
+</mapper>

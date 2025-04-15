@@ -1,0 +1,119 @@
+# services 部分定义了要在 Docker 中运行的各个服务
+services:
+  # 定义名为 mysql 的服务
+  mysql:
+    # 指定使用的 Docker 镜像，这里使用官方的 mysql 镜像
+    image: mysql
+    # 为容器指定一个自定义的名称，方便识别和管理，这里命名为 mysql
+    container_name: mysql
+    # 端口映射配置，将主机的 3306 端口映射到容器的 3306 端口，这样可以通过主机的 3306 端口访问容器内的 MySQL 服务
+    ports:
+      - "3306:3306"
+    # 环境变量配置，设置容器内的环境变量
+    environment:
+      # 设置容器的时区为上海时区
+      TZ: Asia/Shanghai
+      # 设置 MySQL 的 root 用户密码为 1w34567890A，这里的密码应根据实际情况修改为安全的密码
+      MYSQL_ROOT_PASSWORD: 1w34567890A
+    # 数据卷挂载配置，将主机的目录挂载到容器内的相应目录，实现数据的持久化和配置的自定义
+    volumes:
+      # 将主机当前目录下的 mysql/conf 目录挂载到容器内的 /etc/mysql/conf.d 目录，用于存放 MySQL 的配置文件
+      - "./mysql/conf:/etc/mysql/conf.d"
+      # 将主机当前目录下的 mysql/data 目录挂载到容器内的 /var/lib/mysql 目录，用于存放 MySQL 的数据文件
+      - "./mysql/data:/var/lib/mysql"
+      # 将主机当前目录下的 mysql/init 目录挂载到容器内的 /docker-entrypoint-initdb.d 目录，容器启动时会执行该目录下的 SQL 脚本进行初始化
+      - "./mysql/init:/docker-entrypoint-initdb.d"
+    # 网络配置，将该服务加入名为 xq-net 的网络中
+    networks:
+      - xq-net
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+
+  # 定义名为 xq 的服务
+  xq:
+    # 构建镜像的配置，使用当前目录（context:.）下的 Dockerfile 来构建镜像
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # 为容器指定一个自定义的名称，这里命名为 xq
+    container_name: xq
+    # 端口映射配置，将主机的 8888 端口映射到容器的 8888 端口，用于访问容器内的 xq 服务
+    ports:
+      - "8888:8888"
+    # 网络配置，将该服务加入名为 xq-net 的网络中
+    networks:
+      - xq-net
+    # 依赖配置，指定 xq 服务依赖于 mysql、rabbitmq 和 redis 服务，docker-compose 会先启动这些依赖服务再启动 xq 服务
+    depends_on:
+      - mysql
+      - rabbitmq
+      - redis
+
+  # 定义名为 nginx 的服务
+  nginx:
+    # 指定使用的 Docker 镜像，这里使用官方的 nginx 镜像
+    image: nginx
+    # 为容器指定一个自定义的名称，这里命名为 nginx
+    container_name: nginx
+    # 端口映射配置，将主机的 7777 端口映射到容器的 7777 端口，用于访问容器内的 nginx 服务
+    ports:
+      - "7777:7777"
+    # 数据卷挂载配置，将主机的目录挂载到容器内的相应目录，实现配置和静态文件的自定义
+    volumes:
+      - "./nginx/nginx.conf:/etc/nginx/nginx.conf"
+      - "./nginx/html:/usr/share/nginx/html"
+    # 依赖配置，指定 nginx 服务依赖于 xq 服务，docker-compose 会先启动 xq 服务再启动 nginx 服务
+    depends_on:
+      - xq
+    # 网络配置，将该服务加入名为 xq-net 的网络中
+    networks:
+      - xq-net
+
+  # 定义名为 rabbitmq 的服务
+  rabbitmq:
+    # 指定使用的 Docker 镜像，这里使用带有管理界面的 rabbitmq 镜像
+    image: rabbitmq:3-management
+    # 为容器指定一个自定义的名称，这里命名为 rabbitmq
+    container_name: rabbitmq
+    # 端口映射配置，将主机的 5672 端口映射到容器的 5672 端口用于 AMQP 协议通信，将主机的 15672 端口映射到容器的 15672 端口用于访问管理界面
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    # 环境变量配置，设置容器内的环境变量
+    environment:
+      # 设置 rabbitmq 的默认用户名
+      RABBITMQ_DEFAULT_USER: admin
+      # 设置 rabbitmq 的默认密码
+      RABBITMQ_DEFAULT_PASS: 1w34567890A
+    # 数据卷挂载配置，将主机当前目录下的 rabbitmq/data 目录挂载到容器内的 /var/lib/rabbitmq 目录，用于存放 rabbitmq 的数据文件
+    volumes:
+      - "./rabbitmq/data:/var/lib/rabbitmq"
+    # 网络配置，将该服务加入名为 xq-net 的网络中
+    networks:
+      - xq-net
+
+  # 定义名为 redis 的服务
+  redis:
+    # 指定使用的 Docker 镜像，这里使用官方的 redis 镜像
+    image: redis
+    # 为容器指定一个自定义的名称，这里命名为 redis
+    container_name: redis
+    # 端口映射配置，将主机的 6379 端口映射到容器的 6379 端口，用于访问容器内的 redis 服务
+    ports:
+      - "6379:6379"
+    # 数据卷挂载配置，将主机当前目录下的 redis/data 目录挂载到容器内的 /data 目录，用于存放 redis 的数据文件
+    volumes:
+      - "./redis/data:/data"
+    # 命令配置，指定容器启动时执行的命令，这里开启 redis 的持久化功能
+    command: redis-server --appendonly yes --requirepass 1w34567890A
+    # 网络配置，将该服务加入名为 xq-net 的网络中
+    networks:
+      - xq-net
+
+# networks 部分定义了 Docker 网络，这里定义了一个名为 xq-net 的网络，并指定其名称为 xq-net
+networks:
+  xq-net:
+    name: xq-net
